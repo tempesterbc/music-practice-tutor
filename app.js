@@ -76,10 +76,17 @@ async function runDemo() {
     const fd = new FormData();
     fd.append("instrument", $("instrument").value);
     const r = await fetch(API + "/api/demo", { method: "POST", body: fd });
-    if (!r.ok) throw new Error(await r.text());
+    if (!r.ok) throw new Error("api");
     renderResult(await r.json());
     setStatus("Demo complete.", false);
-  } catch (e) { setStatus("Demo failed: " + e.message, false); }
+    return;
+  } catch (e) { /* API offline - fall back to a precomputed sample */ }
+  try {
+    const r = await fetch("./demo_result.json");
+    if (!r.ok) throw new Error("sample");
+    renderResult(await r.json());
+    setStatus("Showing a precomputed sample. Connect the analysis API for live analysis of your own recordings.", false);
+  } catch (e) { setStatus("Demo unavailable.", false); }
 }
 
 let proFiles = [];
