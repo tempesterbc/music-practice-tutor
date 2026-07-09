@@ -82,11 +82,27 @@ async function runDemo() {
   } catch (e) { setStatus("Demo failed: " + e.message, false); }
 }
 
+let proFiles = [];
+function renderProList() {
+  const ul = $("proList");
+  ul.innerHTML = proFiles.map((f, i) =>
+    '<li><span>' + f.name + '</span><button data-i="' + i + '" title="remove">x</button></li>').join("");
+  ul.querySelectorAll("button").forEach((b) =>
+    b.onclick = () => { proFiles.splice(+b.dataset.i, 1); renderProList(); });
+}
+$("pros").addEventListener("change", (e) => {
+  for (const f of e.target.files) {
+    if (!proFiles.some((p) => p.name === f.name && p.size === f.size)) proFiles.push(f);
+  }
+  e.target.value = "";
+  renderProList();
+});
+
 async function runUpload() {
   const stu = $("student").files[0];
-  const pros = $("pros").files;
+  const pros = proFiles;
   if (!stu) return setStatus("Choose your recording first.", false);
-  if (pros.length < 2) return setStatus("Add at least 2 professional reference recordings.", false);
+  if (pros.length < 2) return setStatus("Add at least 2 professional reference recordings (you have " + pros.length + ").", false);
   setStatus("Uploading and analysing… (large files take a moment)", true);
   try {
     const fd = new FormData();

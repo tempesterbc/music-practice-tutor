@@ -63,13 +63,15 @@
         </label>
 
         <label class="field">
-          <span>Professional reference recordings (2+ of the same piece)</span>
+          <span>Professional reference recordings (add 2 or more of the same piece)</span>
           <input type="file" id="pros" accept="audio/*" multiple />
+          <span class="micro">Tip: you can pick several at once, or add more one at a time.</span>
         </label>
+        <ul id="proList" class="filelist"></ul>
 
         <div class="btnrow">
-          <button class="btn primary" id="runUpload">Analyze my recording</button>
-          <button class="btn ghost" id="runDemo">Run the demo</button>
+          <button class="btn primary" id="runDemo">Run the demo (no files needed)</button>
+          <button class="btn ghost" id="runUpload">Analyze my recording</button>
         </div>
         <p class="micro" id="status"></p>
       </div>
