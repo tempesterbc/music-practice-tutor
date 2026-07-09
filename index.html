@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Resonance — AI Music Practice Tutor</title>
+<meta name="description" content="Upload a recording and get an instant, professional-grade diagnosis of tone, intonation, dynamics, timing and vibrato — with targeted practice exercises." />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="brand" href="#top"><span class="dot"></span> Resonance</a>
+    <nav>
+      <a href="#analyze">Analyze</a>
+      <a href="#how">How it works</a>
+      <a href="#detect">What it detects</a>
+      <a href="#exercises">Exercises</a>
+    </nav>
+  </div>
+</header>
+
+<section id="top" class="hero">
+  <div class="wrap">
+    <h1>Practice smarter.<br/>Hear what the pros hear.</h1>
+    <p class="lede">Upload a recording of yourself playing and Resonance compares it to a
+      consensus of professional performances — flagging exactly where your
+      intonation, tone, timbre, dynamics, and timing drift, then prescribing the
+      right exercise for each.</p>
+    <div class="cta">
+      <a class="btn primary" href="#analyze">Try it now</a>
+      <a class="btn ghost" href="#how">See how it works</a>
+    </div>
+    <p class="micro" id="apihint"></p>
+  </div>
+</section>
+
+<section id="analyze" class="panel">
+  <div class="wrap">
+    <h2>Analyze a performance</h2>
+    <p class="sub">Run the built-in demo, or upload your own recording plus a few
+      professional reference recordings of the same piece.</p>
+
+    <div class="analyzer">
+      <div class="controls card">
+        <label class="field">
+          <span>Instrument</span>
+          <select id="instrument">
+            <option value="">General (any)</option>
+            <option value="flute">Flute</option>
+            <option value="clarinet">Clarinet</option>
+            <option value="saxophone">Saxophone</option>
+            <option value="oboe">Oboe</option>
+            <option value="bassoon">Bassoon</option>
+            <option value="trumpet">Trumpet</option>
+            <option value="violin">Violin</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Your recording</span>
+          <input type="file" id="student" accept="audio/*" />
+        </label>
+
+        <label class="field">
+          <span>Professional reference recordings (2+ of the same piece)</span>
+          <input type="file" id="pros" accept="audio/*" multiple />
+        </label>
+
+        <div class="btnrow">
+          <button class="btn primary" id="runUpload">Analyze my recording</button>
+          <button class="btn ghost" id="runDemo">Run the demo</button>
+        </div>
+        <p class="micro" id="status"></p>
+      </div>
+
+      <div class="results card" id="results" hidden>
+        <div class="res-head">
+          <h3 id="resTitle">Diagnosis</h3>
+          <span class="pill" id="tempoPill"></span>
+        </div>
+        <div id="findings" class="findings"></div>
+        <img id="plot" class="plot" alt="Deviation from the professional corridor" />
+        <h3>Your practice plan</h3>
+        <div id="plan" class="plan"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how" class="panel alt">
+  <div class="wrap">
+    <h2>How it works</h2>
+    <div class="grid3">
+      <div class="card step"><div class="num">1</div><h4>Build the corridor</h4>
+        <p>Several professional recordings are aligned in time (Dynamic Time Warping)
+        and fused into a “professional corridor” — the mean and the acceptable range
+        for pitch, loudness, brightness and breathiness at every moment.</p></div>
+      <div class="card step"><div class="num">2</div><h4>Compare you to it</h4>
+        <p>Your recording is aligned onto the same timeline. Wherever you leave the
+        corridor for a sustained stretch, that spot is flagged and mapped back to a
+        time in your own take.</p></div>
+      <div class="card step"><div class="num">3</div><h4>Prescribe exercises</h4>
+        <p>Each flagged problem is matched to targeted exercises from a curated
+        database of 70+ studies — instrument-aware, with the reasoning and steps.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="detect" class="panel">
+  <div class="wrap">
+    <h2>What it detects</h2>
+    <div class="chips" id="detectChips"></div>
+    <p class="micro">Precise per-note rhythm (rushing/dragging) is handled by a companion
+      score-based engine; the corridor engine focuses on tone, intonation, dynamics and timbre.</p>
+  </div>
+</section>
+
+<section id="exercises" class="panel alt">
+  <div class="wrap">
+    <h2>Exercise library</h2>
+    <p class="sub">The recommendations are drawn from this curated database. Filter by category.</p>
+    <div class="filters" id="catFilters"></div>
+    <div id="exGrid" class="exgrid"></div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap">
+    <p>Resonance — an audio-analysis music tutor. Built for a research project.</p>
+    <p class="micro">Front-end on Vercel · analysis API runs separately.</p>
+  </div>
+</footer>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
