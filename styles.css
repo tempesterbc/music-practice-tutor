@@ -145,3 +145,21 @@ h1,h2,h3,h4{line-height:1.15;margin:0 0 .5em}
 .photohelp-body p{margin:6px 0;font-size:14px}
 .photohelp-body ol{margin:6px 0 6px 18px;font-size:14px;line-height:1.6}
 .photohelp-body a{color:var(--accent)}
+
+/* ---- Grading + live marking ---- */
+.graderow{display:flex;align-items:center;gap:14px;margin-top:12px;flex-wrap:wrap}
+.livebox{display:flex;align-items:center;gap:8px}
+.lamp{width:20px;height:20px;border-radius:50%;background:#3a4372;flex:none;
+  box-shadow:0 0 0 3px rgba(255,255,255,.05);transition:background .08s linear}
+.gradereport{margin-top:14px;border:1px solid var(--line);border-radius:12px;background:#10152f;padding:14px}
+.grade-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.grade-head h4{margin:0}
+.grade-stats{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.grade-stats .stat b{color:var(--ink);font-size:15px}
+.notechips{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+.notechip{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-width:44px;padding:4px 6px;border-radius:8px;color:#0d1020;line-height:1.15}
+.notechip b{font-size:13px}
+.notechip span{font-size:10px;opacity:.85}
+.grade-tips ul{margin:6px 0 6px 18px;line-height:1.6}
+.grade-tips li{margin:3px 0}

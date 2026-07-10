@@ -114,6 +114,12 @@
         <button class="btn ghost" id="playStop" hidden>Stop</button>
         <span class="micro" id="playHint">Follows the highlighted note at the metronome tempo.</span>
       </div>
+
+      <div class="graderow" id="graderow" hidden>
+        <button class="btn primary" id="gradeRun">● Play &amp; grade against the score</button>
+        <div class="livebox"><span class="lamp" id="liveLamp"></span><span class="micro" id="liveReadout">—</span></div>
+      </div>
+      <div id="gradeReport" class="gradereport" hidden></div>
     </div>
   </div>
 </section>
@@ -226,7 +232,9 @@
 <script src="diagrams.js"></script>
 <script src="notation.js"></script>
 <script src="studio.js"></script>
+<script src="pitch.js"></script>
 <script src="score.js"></script>
+<script src="grade.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
