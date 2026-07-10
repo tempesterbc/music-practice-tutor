@@ -87,6 +87,25 @@
         <input type="file" id="scoreFile" accept=".xml,.musicxml,.mxl,.mid,.midi" />
         <span class="micro">Free tip: in MuseScore, File → Export → MusicXML. This is read exactly.</span>
       </label>
+
+      <details class="photohelp">
+        <summary>Only have a photo or screenshot of the music?</summary>
+        <div class="photohelp-body">
+          <p>Scanning printed music from a photo (optical music recognition) needs a
+             dedicated engine to be accurate. Convert your photo to a <b>MusicXML</b>
+             file with one of these free tools, then upload it above — it'll read exactly
+             and unlock the engraved score, play-along, and analysis.</p>
+          <ol>
+            <li><b>PlayScore 2</b> (phone app) — photograph the page, then export MusicXML.
+                <a href="https://playscore.co" target="_blank" rel="noopener">playscore.co</a></li>
+            <li><b>MuseScore 4</b> (free desktop) — import your PDF/score, check it, then
+                File → Export → MusicXML.
+                <a href="https://musescore.org" target="_blank" rel="noopener">musescore.org</a></li>
+          </ol>
+          <p class="micro">Single-line parts scan most reliably — always glance over the
+             result before trusting the analysis. Chords and dense piano scores are hardest.</p>
+        </div>
+      </details>
       <p class="micro" id="scoreStatus">No score loaded yet.</p>
       <div id="score" class="scorebox"></div>
       <div class="playrow" id="playRow" hidden>

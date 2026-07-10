@@ -137,3 +137,11 @@ h1,h2,h3,h4{line-height:1.15;margin:0 0 .5em}
 .playrow{display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap}
 .chk{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
 .chk input{width:auto}
+
+/* ---- Photo -> MusicXML helper ---- */
+.photohelp{margin-top:12px;border:1px solid var(--line);border-radius:10px;background:#10152f;padding:6px 12px}
+.photohelp summary{cursor:pointer;font-size:14px;color:var(--accent);padding:4px 0}
+.photohelp-body{padding:4px 0 8px}
+.photohelp-body p{margin:6px 0;font-size:14px}
+.photohelp-body ol{margin:6px 0 6px 18px;font-size:14px;line-height:1.6}
+.photohelp-body a{color:var(--accent)}
