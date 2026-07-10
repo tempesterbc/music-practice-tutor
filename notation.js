@@ -50,7 +50,7 @@
 
   // ---- which exercises get notation, and which kind ----
   function notationKind(name, category) {
-    const s = ((name || "") + " " + (category || "")).toLowerCase();
+    const s = ((name || "") + " " + (category || "")).toLowerCase().replace(/[–—]/g, "-");
     const has = (...w) => w.some((k) => s.includes(k));
     // breath / dynamics keep their schematic diagram
     if (has("breath", "diaphrag", "straw", "terracing", "dynamic terrac")) return null;
