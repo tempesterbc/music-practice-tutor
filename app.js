@@ -191,8 +191,21 @@ function renderExercises() {
   }).join("");
   if (window.renderNotation) renderNotation($("exGrid"));
 }
+function initInstrumentPicker() {
+  const sel = $("exInstrument"), cap = $("exCap");
+  if (!sel || !window.Notation) return;
+  sel.innerHTML = window.Notation.instruments().map((n) =>
+    '<option' + (n === window.Notation.current() ? " selected" : "") + ">" + n + "</option>").join("");
+  if (cap) cap.textContent = window.Notation.caption();
+  sel.addEventListener("change", () => {
+    window.Notation.setInstrument(sel.value);
+    if (cap) cap.textContent = window.Notation.caption();
+    renderExercises();
+  });
+}
+
 async function loadExercises() {
-  const sources = [API + "/api/exercises", "./exercise_database.json"];
+  const sources = ["./exercise_database.json", API + "/api/exercises"];
   for (const url of sources) {
     try {
       const r = await fetch(url);
@@ -216,5 +229,6 @@ $("student").addEventListener("change", (e) => {
 $("runDemo").onclick = runDemo;
 $("runUpload").onclick = runUpload;
 renderChips();
+initInstrumentPicker();
 health();
 loadExercises();

@@ -352,6 +352,60 @@
       "difficulty": "Intermediate"
     },
     {
+      "exercise": "Legato (All-Slur) Scales",
+      "category": "Articulation",
+      "instrument": "Winds, brass, strings",
+      "primary": "Smooth, connected air/bow across a scale with no tongue/bow break",
+      "secondary": "Even tone through register changes, finger–air coordination",
+      "how": "Play a scale up and down slurring every note in one breath/bow; keep the air/bow speed constant so the line is seamless.",
+      "difficulty": "Beginner"
+    },
+    {
+      "exercise": "Staccato (Tongued) Scales",
+      "category": "Articulation",
+      "instrument": "Winds, brass",
+      "primary": "Short, clean, uniformly-detached notes across a scale",
+      "secondary": "Tongue speed and note-length consistency, steady air under short notes",
+      "how": "Play a scale tonguing every note short and equal (light 'tah'/'dah'); keep the air moving between notes so pitch stays centered.",
+      "difficulty": "Beginner"
+    },
+    {
+      "exercise": "Slur–Tongue Patterns (2 slur, 2 tongue)",
+      "category": "Articulation",
+      "instrument": "Winds, brass",
+      "primary": "Switching cleanly between slurred and tongued notes",
+      "secondary": "Consistent tone across articulation changes; classic Clarke/Arban pattern",
+      "how": "On a scale, slur the first two notes of each beat and tongue the next two (S S T T); then reverse to T T S S. Keep the air identical under both.",
+      "difficulty": "Intermediate"
+    },
+    {
+      "exercise": "Tongue–Slur–Tongue Groupings",
+      "category": "Articulation",
+      "instrument": "Winds, brass",
+      "primary": "Mixed articulation control within a group (T S S T)",
+      "secondary": "Phrasing flexibility, evenness when tongue starts and ends a slur",
+      "how": "Group a scale in fours: tongue the outer notes and slur the inner pair (tongue–slur–slur–tongue). Keep every note the same length and volume.",
+      "difficulty": "Intermediate"
+    },
+    {
+      "exercise": "Articulation Ladder (legato → staccato)",
+      "category": "Articulation",
+      "instrument": "All instruments",
+      "primary": "Full spectrum of note lengths on one passage",
+      "secondary": "Style differentiation and control from fully connected to fully separated",
+      "how": "Play the same scale several times, shortening the notes each pass: legato → tenuto → normal → staccato. The air/bow stays steady; only the release changes.",
+      "difficulty": "Intermediate"
+    },
+    {
+      "exercise": "Rhythmic Scale Variations (dotted, triplet, swing)",
+      "category": "Finger & Hand Technique",
+      "instrument": "All pitched instruments",
+      "primary": "Finger evenness under different rhythmic groupings",
+      "secondary": "Internal subdivision, tempo control, evenness when the rhythm shifts",
+      "how": "Play a scale applying a rhythm to each pass: straight eighths, dotted (long–short), reverse-dotted (short–long), triplets, then swing. Metronome on; keep pitches even as the rhythm changes.",
+      "difficulty": "Intermediate"
+    },
+    {
       "exercise": "Open-String Long Bows",
       "category": "String Technique",
       "instrument": "Violin family",

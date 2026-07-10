@@ -168,3 +168,9 @@ h1,h2,h3,h4{line-height:1.15;margin:0 0 .5em}
 .grade-music{margin:10px 0;padding:10px 12px;border-left:3px solid var(--accent);background:#141a35;border-radius:0 8px 8px 0}
 .grade-music ul{margin:6px 0 0 16px;line-height:1.7}
 .notechip i{font-style:normal;font-size:11px}
+
+/* ---- Exercise library instrument picker ---- */
+.exhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:6px 0 12px}
+.exinstr{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+.exinstr select{padding:6px 10px}
+#exCap{color:var(--muted)}
