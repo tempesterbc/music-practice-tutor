@@ -163,3 +163,8 @@ h1,h2,h3,h4{line-height:1.15;margin:0 0 .5em}
 .notechip span{font-size:10px;opacity:.85}
 .grade-tips ul{margin:6px 0 6px 18px;line-height:1.6}
 .grade-tips li{margin:3px 0}
+
+/* ---- Musicality block ---- */
+.grade-music{margin:10px 0;padding:10px 12px;border-left:3px solid var(--accent);background:#141a35;border-radius:0 8px 8px 0}
+.grade-music ul{margin:6px 0 0 16px;line-height:1.7}
+.notechip i{font-style:normal;font-size:11px}

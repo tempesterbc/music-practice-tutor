@@ -1,7 +1,7 @@
 // Score-based grading + live mistake marking (client-side).
 // Reuses the play-along cursor for timing: because the player follows the cursor,
-// we know when each note should sound, so we grade each note's pitch from the mic
-// in real time (live lamp) and summarise at the end.
+// we know when each note should sound, so we grade each note's pitch, steadiness,
+// vibrato and loudness from the mic — live (lamp) and in a summary at the end.
 (function () {
   const $ = (id) => document.getElementById(id);
   const PD = () => window.PitchDetector;
@@ -33,12 +33,13 @@
     analyser.getFloatTimeDomainData(buf);
     const r = PD().yin(buf, ac.sampleRate);
     let midiFloat = null;
-    if (r.freq > 0 && r.clarity > 0.5) {
+    if (r.freq > 0 && r.clarity > 0.6) {
       midiFloat = PD().freqToMidi(r.freq);
-      if (currentIndex >= 0) (frames[currentIndex] = frames[currentIndex] || []).push(midiFloat);
+      if (currentIndex >= 0)
+        (frames[currentIndex] = frames[currentIndex] || []).push({ t: performance.now(), midi: midiFloat, rms: r.rms });
     }
     updateLamp(midiFloat, expForIndex(currentIndex));
-    loopId = setTimeout(loop, 55);
+    loopId = setTimeout(loop, 25);          // ~40 Hz so vibrato (4–8 Hz) resolves
   }
 
   function updateLamp(midiFloat, expMidi) {
@@ -63,16 +64,34 @@
   const COL = { good: "#2e9b57", off: "#e0a021", wrong: "#d64545", missed: "#8a8f9c" };
   const LABEL = { good: "in tune", off: "out of tune", wrong: "wrong note", missed: "no sound" };
 
+  // Per-note analysis: trims to the stable middle, removes stray octave frames,
+  // then measures tuning, steadiness, vibrato and loudness.
+  function analyzeNote(fr, expMidi) {
+    if (!fr || fr.length < 3) return { verdict: "missed" };
+    fr = fr.slice().sort((a, b) => a.t - b.t);
+    const lo = Math.floor(fr.length * 0.15), hi = Math.ceil(fr.length * 0.85);
+    let mid = fr.slice(lo, hi); if (mid.length < 3) mid = fr;
+    const medRound = PD().median(mid.map((f) => Math.round(f.midi)));
+    mid = mid.filter((f) => Math.abs(f.midi - medRound) < 7);        // drop octave/harmonic strays
+    if (mid.length < 3) return { verdict: "missed" };
+    const midis = mid.map((f) => f.midi);
+    const medMidi = PD().median(midis);
+    const cents = (medMidi - expMidi) * 100, a = Math.abs(cents);
+    const verdict = a <= 35 ? "good" : (a <= 120 ? "off" : "wrong");
+    const meanMidi = midis.reduce((s, x) => s + x, 0) / midis.length;
+    const steady = Math.round(PD().std(midis) * 100);               // pitch jitter, cents
+    const contour = mid.map((f) => ({ t: f.t, cents: (f.midi - meanMidi) * 100 }));
+    const vib = PD().analyzeVibrato(contour);
+    const loud = mid.reduce((s, f) => s + (f.rms || 0), 0) / mid.length;
+    return { verdict, cents, steady, vib, loud };
+  }
+
   function gradeAndRender() {
     const notes = window.ScoreView.notes();
     const sounding = notes.map((n, i) => ({ midi: n.midi, index: i })).filter((n) => n.midi != null);
     const res = sounding.map((n) => {
-      const fr = (frames[n.index] || []).slice().sort((a, b) => a - b);
-      if (fr.length < 2) return { midi: n.midi, verdict: "missed", cents: null, played: null };
-      const med = fr[Math.floor(fr.length / 2)];
-      const cents = (med - n.midi) * 100, a = Math.abs(cents);
-      const verdict = a <= 35 ? "good" : (a <= 120 ? "off" : "wrong");
-      return { midi: n.midi, verdict, cents, played: med };
+      const a = analyzeNote(frames[n.index], n.midi);
+      return Object.assign({ midi: n.midi }, a);
     });
     renderReport(res);
   }
@@ -82,29 +101,58 @@
     if (!box) return;
     const n = res.length || 1;
     const c = { good: 0, off: 0, wrong: 0, missed: 0 };
-    let signed = 0, signedN = 0;
+    let signed = 0, signedN = 0, steadySum = 0, steadyN = 0;
+    const played = res.filter((r) => r.verdict !== "missed");
     res.forEach((r) => {
       c[r.verdict]++;
       if (r.cents != null && (r.verdict === "good" || r.verdict === "off")) { signed += r.cents; signedN++; }
+      if (r.steady != null && r.verdict !== "missed") { steadySum += r.steady; steadyN++; }
     });
     const inTune = Math.round((c.good / n) * 100);
     const avgSigned = signedN ? Math.round(signed / signedN) : 0;
+    const avgSteady = steadyN ? Math.round(steadySum / steadyN) : 0;
 
+    // vibrato across sustained notes
+    const vibNotes = played.filter((r) => r.vib && r.vib.present);
+    const vibRate = vibNotes.length ? (vibNotes.reduce((s, r) => s + r.vib.rateHz, 0) / vibNotes.length) : 0;
+    const vibDepth = vibNotes.length ? Math.round(vibNotes.reduce((s, r) => s + r.vib.depthCents, 0) / vibNotes.length) : 0;
+    const vibRateSpread = PD().std(vibNotes.map((r) => r.vib.rateHz));
+
+    // dynamics: loudness range across notes, in dB relative to loudest
+    const louds = played.map((r) => r.loud).filter((x) => x > 0);
+    const maxLoud = Math.max.apply(null, louds.concat([1e-6]));
+    const dbs = louds.map((x) => 20 * Math.log10(x / maxLoud));
+    const dynRange = dbs.length ? Math.round(Math.max.apply(null, dbs) - Math.min.apply(null, dbs)) : 0;
+
+    // ---- tips ----
     const tips = [];
-    if (c.missed / n > 0.2) tips.push("Several notes didn't sound clearly — slow the tempo and make sure each note speaks before moving on.");
+    if (c.missed / n > 0.2) tips.push("Several notes didn’t sound clearly — slow the tempo and make each note speak before moving on.");
     if (c.wrong / n > 0.1) tips.push("Some wrong pitches — practice the passage slowly and check the notes/fingerings.");
-    if (avgSigned < -12) tips.push("You trend flat — long tones against a drone or tuner will pull your pitch center up.");
-    else if (avgSigned > 12) tips.push("You trend sharp — relax the air/embouchure and check with a drone.");
-    if (c.off / n > 0.25 && Math.abs(avgSigned) <= 12) tips.push("Intonation wanders both directions — slow scales against a drone to lock each pitch.");
-    if (!tips.length) tips.push("Clean run — keep it up. Push the tempo a notch and stay this accurate.");
+    if (avgSigned < -12) tips.push("You trend flat (" + avgSigned + "¢ on average) — long tones against a drone will raise your pitch center.");
+    else if (avgSigned > 12) tips.push("You trend sharp (+" + avgSigned + "¢ on average) — relax the air/embouchure and check against a drone.");
+    if (avgSteady > 30) tips.push("Your pitch wobbles within notes (±" + avgSteady + "¢) — sustained long tones will steady it.");
+    if (vibNotes.length >= 2 && vibRateSpread > 1.2) tips.push("Your vibrato speed is uneven — practice it in rhythm to the metronome (e.g. 4 pulses per beat).");
+    if (played.length >= 4 && dynRange < 4) tips.push("Dynamics are quite flat — shape the phrase with a swell and taper to add musicality.");
+    if (!tips.length) tips.push("Clean, musical run — keep it up. Nudge the tempo up and hold this accuracy.");
 
-    const chips = res.map((r, i) => {
+    const chips = res.map((r) => {
       const label = PD().midiToName(r.midi);
-      const sub = r.verdict === "missed" ? "—"
-        : (r.cents > 0 ? "+" : "") + Math.round(r.cents) + "¢";
-      return '<span class="notechip" title="' + LABEL[r.verdict] + '" style="background:' + COL[r.verdict] + '">' +
-        '<b>' + label + '</b><span>' + sub + '</span></span>';
+      const sub = r.verdict === "missed" ? "—" : (r.cents > 0 ? "+" : "") + Math.round(r.cents) + "¢";
+      const vibMark = r.vib && r.vib.present ? '<i title="vibrato ' + r.vib.rateHz + ' Hz">∿</i>' : "";
+      return '<span class="notechip" title="' + LABEL[r.verdict] + (r.steady != null ? " · ±" + r.steady + "¢ steady" : "") +
+        '" style="background:' + COL[r.verdict] + '"><b>' + label + '</b><span>' + sub + " " + vibMark + "</span></span>";
     }).join("");
+
+    const musicality =
+      '<div class="grade-music"><b>Musicality</b><ul>' +
+      "<li><b>Vibrato:</b> " + (vibNotes.length
+        ? "on " + vibNotes.length + " of " + played.length + " notes, ~" + vibRate.toFixed(1) + " Hz, ±" + vibDepth + "¢ "
+          + (vibRateSpread > 1.2 ? "(uneven speed)" : "(even)")
+        : "none detected — add a steady, even vibrato on sustained notes") + "</li>" +
+      "<li><b>Steadiness:</b> pitch held to ±" + avgSteady + "¢ within notes " +
+        (avgSteady <= 20 ? "(very steady)" : avgSteady <= 35 ? "(fairly steady)" : "(wobbly)") + "</li>" +
+      "<li><b>Dynamics:</b> " + (dynRange >= 4 ? "shaped, ~" + dynRange + " dB range across the phrase" : "flat, ~" + dynRange + " dB — try shaping the line") + "</li>" +
+      "</ul></div>";
 
     box.hidden = false;
     box.innerHTML =
@@ -113,13 +161,14 @@
         '<span class="stat"><b>' + inTune + '%</b> in tune</span>' +
         '<span class="stat"><b>' + c.wrong + '</b> wrong</span>' +
         '<span class="stat"><b>' + c.missed + '</b> missed</span>' +
-        '<span class="stat"><b>' + (avgSigned > 0 ? "+" : "") + avgSigned + '¢</b> avg</span>' +
+        '<span class="stat"><b>' + (avgSigned > 0 ? "+" : "") + avgSigned + '¢</b> avg tuning</span>' +
       '</div></div>' +
       '<div class="notechips">' + chips + '</div>' +
+      musicality +
       '<div class="grade-tips"><b>What to work on</b><ul>' +
         tips.map((t) => "<li>" + t + "</li>").join("") + "</ul>" +
-        '<p class="micro">Every note is graded against your uploaded score. Green = in tune, ' +
-        'amber = out of tune, red = wrong note, grey = didn’t sound.</p></div>';
+        '<p class="micro">Graded against your uploaded score. Green = in tune, amber = out of tune, ' +
+        'red = wrong note, grey = didn’t sound; ∿ marks detected vibrato.</p></div>';
     box.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
@@ -128,7 +177,7 @@
     if (!grading) return;
     currentIndex = -1; frames = {};
     const box = $("gradeReport"); if (box) box.hidden = true;
-    startMonitor().catch((e) => {
+    startMonitor().catch(() => {
       grading = false;
       const txt = $("liveReadout"); if (txt) txt.textContent = "Microphone blocked — allow mic access and try again.";
       window.PlayAlong.stop();
