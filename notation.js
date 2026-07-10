@@ -41,7 +41,7 @@
 
   function drawOne(el, kind) {
     if (!KINDS.has(kind)) return false;
-    el.innerHTML = '<img class="vfimg" alt="' + kind + ' notation" loading="lazy" ' +
+    el.innerHTML = '<img class="vfimg" alt="' + kind + ' notation" ' +
       'src="' + famOf() + '-' + kind + '.svg?v=2">';
     el.setAttribute("data-done", "1");
     return true;
