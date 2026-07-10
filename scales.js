@@ -129,8 +129,12 @@
     tk.loadData(xml);
     let svg = tk.renderToSVG(1);
     const m = svg.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/);
-    if (m) svg = svg.replace("<svg ", `<svg width="${m[1]}" height="${m[2]}" style="width:100%;height:auto" `);
-    $("scScore").innerHTML = svg;
+    if (m) svg = svg.replace("<svg ", `<svg width="${m[1]}" height="${m[2]}" `);
+    const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
+    const box = $("scScore");
+    if (box._url) URL.revokeObjectURL(box._url);
+    box._url = url;
+    box.innerHTML = '<img alt="' + sc.name + '" style="display:block;width:100%;height:auto;max-height:180px" src="' + url + '">';
     const cap = $("scCap");
     if (inst.iv === 0) cap.textContent = sc.name + " — concert pitch.";
     else cap.textContent = "Written " + sc.name + " for " + $("scInstrument").value +
