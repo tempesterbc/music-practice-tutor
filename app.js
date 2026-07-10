@@ -105,17 +105,53 @@ $("pros").addEventListener("change", (e) => {
   renderProList();
 });
 
+// ---- shrink audio in the browser before upload (decode -> 16k mono -> <=45s WAV) ----
+function _encodeWav(samples, sr) {
+  const buf = new ArrayBuffer(44 + samples.length * 2);
+  const view = new DataView(buf);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, "RIFF"); view.setUint32(4, 36 + samples.length * 2, true); w(8, "WAVE");
+  w(12, "fmt "); view.setUint32(16, 16, true); view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true); view.setUint32(24, sr, true);
+  view.setUint32(28, sr * 2, true); view.setUint16(32, 2, true); view.setUint16(34, 16, true);
+  w(36, "data"); view.setUint32(40, samples.length * 2, true);
+  let o = 44;
+  for (let i = 0; i < samples.length; i++, o += 2) {
+    let s = Math.max(-1, Math.min(1, samples[i]));
+    view.setInt16(o, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+  }
+  return new Blob([view], { type: "audio/wav" });
+}
+
+async function audioToSmallWav(file, maxSec = 45, sr = 16000) {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  const actx = new AC();
+  const decoded = await actx.decodeAudioData(await file.arrayBuffer());
+  actx.close();
+  const dur = Math.min(maxSec, decoded.duration);
+  const length = Math.max(1, Math.ceil(dur * sr));
+  const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  const offline = new OAC(1, length, sr);   // 1 channel = auto downmix to mono
+  const src = offline.createBufferSource();
+  src.buffer = decoded;
+  src.connect(offline.destination);
+  src.start(0);
+  const rendered = await offline.startRendering();
+  return _encodeWav(rendered.getChannelData(0), sr);
+}
+
 async function runUpload() {
   const stu = $("student").files[0];
   const pros = proFiles;
   if (!stu) return setStatus("Choose your recording first.", false);
   if (pros.length < 2) return setStatus("Add at least 2 professional reference recordings (you have " + pros.length + ").", false);
-  setStatus("Uploading and analysing… (large files take a moment)", true);
   try {
+    setStatus("Preparing audio (shrinking files for upload)…", true);
     const fd = new FormData();
-    fd.append("student", stu);
-    for (const p of pros) fd.append("pros", p);
+    fd.append("student", await audioToSmallWav(stu), "student.wav");
+    for (const p of pros) fd.append("pros", await audioToSmallWav(p), "pro.wav");
     fd.append("instrument", $("instrument").value);
+    setStatus("Analysing…", true);
     const r = await fetch(API + "/api/analyze", { method: "POST", body: fd });
     if (!r.ok) throw new Error(await r.text());
     renderResult(await r.json());
