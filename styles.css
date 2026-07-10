@@ -178,3 +178,9 @@ h1,h2,h3,h4{line-height:1.15;margin:0 0 .5em}
 /* ---- Pre-rendered engraved notation (Verovio SVG images) ---- */
 .vfwrap{overflow:visible;background:#f7f5ef}
 .vfwrap img.vfimg{display:block;width:100%;height:auto;max-height:150px;object-fit:contain}
+
+/* ---- Richer exercise detail rows ---- */
+.exrow{display:block;margin:7px 0;font-size:13.5px;line-height:1.55}
+.exlbl{display:inline-block;min-width:74px;color:var(--accent);font-weight:600;font-size:11px;
+  text-transform:uppercase;letter-spacing:.04em;vertical-align:top;margin-right:6px}
+.exrow > span:last-child{color:var(--ink)}

@@ -184,10 +184,15 @@ function renderExercises() {
     const dg = nk ? "" : ((window.diagramFor && diagramFor(e.exercise, e.category)) || "");
     const media = nk ? '<div class="vfwrap" data-vf="' + nk + '"></div>'
                      : (dg ? '<div class="dgwrap">' + dg + '</div>' : "");
+    const row = (lbl, val) => val ? '<div class="exrow"><span class="exlbl">' + lbl + '</span><span>' + val + '</span></div>' : '';
     return '<div class="excard"><span class="diff">' + e.difficulty + '</span>' +
       '<div class="cat">' + e.category + '</div><h4>' + e.exercise + '</h4>' +
       media +
-      '<p>' + e.how + '</p></div>';
+      row('Develops', e.primary) +
+      row('How', e.how) +
+      row('Pro&nbsp;tip', e.cues) +
+      row('Level&nbsp;up', e.progress) +
+      '</div>';
   }).join("");
   if (window.renderNotation) renderNotation($("exGrid"));
 }
