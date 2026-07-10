@@ -16,6 +16,7 @@
       <a href="#analyze">Analyze</a>
       <a href="#how">How it works</a>
       <a href="#detect">What it detects</a>
+      <a href="#scales">Scales</a>
       <a href="#exercises">Exercises</a>
     </nav>
   </div>
@@ -208,6 +209,21 @@
   </div>
 </section>
 
+<section id="scales" class="panel">
+  <div class="wrap">
+    <h2>Scale explorer</h2>
+    <p class="sub">Pick your instrument, a key, and a scale type. It engraves the real
+      notation with the correct key signature, transposed for your instrument.</p>
+    <div class="exhead">
+      <label class="exinstr">Instrument <select id="scInstrument"></select></label>
+      <label class="exinstr">Key (concert) <select id="scKey"></select></label>
+      <label class="exinstr">Scale <select id="scType"></select></label>
+    </div>
+    <p class="micro" id="scCap"></p>
+    <div id="scScore" class="scorebox"></div>
+  </div>
+</section>
+
 <section id="exercises" class="panel alt">
   <div class="wrap">
     <h2>Exercise library</h2>
@@ -236,6 +252,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@tonejs/midi@2.0.28/build/Midi.js"></script>
 <script src="diagrams.js"></script>
 <script src="notation.js"></script>
+<script src="scales.js"></script>
 <script src="studio.js"></script>
 <script src="pitch.js"></script>
 <script src="score.js"></script>
