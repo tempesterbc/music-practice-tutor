@@ -127,9 +127,7 @@
     const sc = buildScale(writtenPc, type, inst.clef);
     const xml = scoreXML(inst.clef, sc.fifths, sc.notes);
     tk.loadData(xml);
-    let svg = tk.renderToSVG(1);
-    const m = svg.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/);
-    if (m) svg = svg.replace("<svg ", `<svg width="${m[1]}" height="${m[2]}" `);
+    const svg = tk.renderToSVG(1);          // already sized (width/height in px)
     const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
     const box = $("scScore");
     if (box._url) URL.revokeObjectURL(box._url);
