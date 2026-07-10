@@ -101,3 +101,8 @@ h1,h2,h3,h4{line-height:1.15;margin:0 0 .5em}
 .dgwrap{background:#10152f;border:1px solid var(--line);border-radius:10px;padding:8px;margin:8px 0}
 .exdiagram{display:block;width:100%;height:auto;max-height:130px}
 .ex .dgwrap{max-width:320px}
+
+/* Engraved notation (VexFlow) renders black on a light "paper" card */
+.vfwrap{background:#f7f5ef;border:1px solid var(--line);border-radius:10px;padding:6px 8px;margin:8px 0;overflow:hidden}
+.vfwrap svg{display:block;width:100%;height:auto}
+.ex .vfwrap{max-width:340px}

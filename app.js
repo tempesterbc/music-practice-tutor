@@ -61,15 +61,19 @@ function renderResult(d) {
   if (!d.plan.length) { pw.innerHTML = '<p class="micro">No exercises needed — keep maintaining with daily long tones.</p>'; }
   d.plan.forEach((p, i) => {
     let exs = p.exercises.map((e) => {
-      const dg = (window.diagramFor && diagramFor(e.name, e.category)) || "";
+      const nk = (window.notationKind && notationKind(e.name, e.category)) || "";
+      const dg = nk ? "" : ((window.diagramFor && diagramFor(e.name, e.category)) || "");
+      const media = nk ? '<div class="vfwrap" data-vf="' + nk + '"></div>'
+                       : (dg ? '<div class="dgwrap">' + dg + '</div>' : "");
       return '<div class="ex"><div class="exname">' + e.name + '</div>' +
         '<div class="meta">' + e.category + ' · ' + e.difficulty + ' · develops ' + e.develops + '</div>' +
-        (dg ? '<div class="dgwrap">' + dg + '</div>' : '') +
+        media +
         '<div class="how">' + e.how + '</div></div>';
     }).join("");
     pw.insertAdjacentHTML("beforeend",
       '<div class="planitem"><div class="prob">' + (i + 1) + '. ' + p.problem + '</div>' + exs + '</div>');
   });
+  if (window.renderNotation) renderNotation(pw);
   $("results").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
@@ -176,12 +180,16 @@ function renderExercises() {
     b.onclick = () => { activeCat = b.dataset.c; renderExercises(); });
   const list = EXDB.exercises.filter((e) => activeCat === "All" || e.category === activeCat);
   $("exGrid").innerHTML = list.map((e) => {
-    const dg = (window.diagramFor && diagramFor(e.exercise, e.category)) || "";
+    const nk = (window.notationKind && notationKind(e.exercise, e.category)) || "";
+    const dg = nk ? "" : ((window.diagramFor && diagramFor(e.exercise, e.category)) || "");
+    const media = nk ? '<div class="vfwrap" data-vf="' + nk + '"></div>'
+                     : (dg ? '<div class="dgwrap">' + dg + '</div>' : "");
     return '<div class="excard"><span class="diff">' + e.difficulty + '</span>' +
       '<div class="cat">' + e.category + '</div><h4>' + e.exercise + '</h4>' +
-      (dg ? '<div class="dgwrap">' + dg + '</div>' : '') +
+      media +
       '<p>' + e.how + '</p></div>';
   }).join("");
+  if (window.renderNotation) renderNotation($("exGrid"));
 }
 async function loadExercises() {
   const sources = [API + "/api/exercises", "./exercise_database.json"];
