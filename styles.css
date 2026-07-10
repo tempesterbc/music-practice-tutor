@@ -174,3 +174,7 @@ h1,h2,h3,h4{line-height:1.15;margin:0 0 .5em}
 .exinstr{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
 .exinstr select{padding:6px 10px}
 #exCap{color:var(--muted)}
+
+/* ---- Pre-rendered engraved notation (Verovio SVG images) ---- */
+.vfwrap{overflow:visible;background:#f7f5ef}
+.vfwrap img.vfimg{display:block;width:100%;height:auto;max-height:150px;object-fit:contain}
