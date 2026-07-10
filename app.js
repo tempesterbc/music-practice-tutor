@@ -60,10 +60,13 @@ function renderResult(d) {
   const pw = $("plan"); pw.innerHTML = "";
   if (!d.plan.length) { pw.innerHTML = '<p class="micro">No exercises needed — keep maintaining with daily long tones.</p>'; }
   d.plan.forEach((p, i) => {
-    let exs = p.exercises.map((e) =>
-      '<div class="ex"><div class="exname">' + e.name + '</div>' +
-      '<div class="meta">' + e.category + ' · ' + e.difficulty + ' · develops ' + e.develops + '</div>' +
-      '<div class="how">' + e.how + '</div></div>').join("");
+    let exs = p.exercises.map((e) => {
+      const dg = (window.diagramFor && diagramFor(e.name, e.category)) || "";
+      return '<div class="ex"><div class="exname">' + e.name + '</div>' +
+        '<div class="meta">' + e.category + ' · ' + e.difficulty + ' · develops ' + e.develops + '</div>' +
+        (dg ? '<div class="dgwrap">' + dg + '</div>' : '') +
+        '<div class="how">' + e.how + '</div></div>';
+    }).join("");
     pw.insertAdjacentHTML("beforeend",
       '<div class="planitem"><div class="prob">' + (i + 1) + '. ' + p.problem + '</div>' + exs + '</div>');
   });
@@ -172,10 +175,13 @@ function renderExercises() {
   $("catFilters").querySelectorAll(".fbtn").forEach((b) =>
     b.onclick = () => { activeCat = b.dataset.c; renderExercises(); });
   const list = EXDB.exercises.filter((e) => activeCat === "All" || e.category === activeCat);
-  $("exGrid").innerHTML = list.map((e) =>
-    '<div class="excard"><span class="diff">' + e.difficulty + '</span>' +
-    '<div class="cat">' + e.category + '</div><h4>' + e.exercise + '</h4>' +
-    '<p>' + e.how + '</p></div>').join("");
+  $("exGrid").innerHTML = list.map((e) => {
+    const dg = (window.diagramFor && diagramFor(e.exercise, e.category)) || "";
+    return '<div class="excard"><span class="diff">' + e.difficulty + '</span>' +
+      '<div class="cat">' + e.category + '</div><h4>' + e.exercise + '</h4>' +
+      (dg ? '<div class="dgwrap">' + dg + '</div>' : '') +
+      '<p>' + e.how + '</p></div>';
+  }).join("");
 }
 async function loadExercises() {
   const sources = [API + "/api/exercises", "./exercise_database.json"];
