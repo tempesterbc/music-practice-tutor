@@ -148,9 +148,9 @@ async function audioToSmallWav(file, maxSec = 45, sr = 16000) {
 }
 
 async function runUpload() {
-  const stu = $("student").files[0];
+  const stu = window.__recordedBlob || $("student").files[0];
   const pros = proFiles;
-  if (!stu) return setStatus("Choose your recording first.", false);
+  if (!stu) return setStatus("Record a take above, or choose a file first.", false);
   if (pros.length < 2) return setStatus("Add at least 2 professional reference recordings (you have " + pros.length + ").", false);
   try {
     setStatus("Preparing audio (shrinking files for upload)…", true);
@@ -204,6 +204,14 @@ async function loadExercises() {
   }
   $("exGrid").innerHTML = '<p class="micro">Exercise library unavailable.</p>';
 }
+
+$("student").addEventListener("change", (e) => {
+  if (e.target.files[0]) {
+    window.__recordedBlob = null;
+    const label = $("studentChosen");
+    if (label) label.textContent = "Using uploaded file: " + e.target.files[0].name;
+  }
+});
 
 $("runDemo").onclick = runDemo;
 $("runUpload").onclick = runUpload;

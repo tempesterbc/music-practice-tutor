@@ -12,6 +12,7 @@
   <div class="wrap nav-in">
     <a class="brand" href="#top"><span class="dot"></span> Resonance</a>
     <nav>
+      <a href="#studio">Studio</a>
       <a href="#analyze">Analyze</a>
       <a href="#how">How it works</a>
       <a href="#detect">What it detects</a>
@@ -35,9 +36,56 @@
   </div>
 </section>
 
+<section id="studio" class="panel alt">
+  <div class="wrap">
+    <h2>Practice studio</h2>
+    <p class="sub">Set a tempo and click, then record yourself right here in the browser —
+      no separate app needed. Send the take straight to the analyzer.</p>
+
+    <div class="studio">
+      <div class="card studio-card">
+        <h3>Metronome</h3>
+        <div class="metro">
+          <div class="beatdot" id="metroDot"></div>
+          <div class="metro-controls">
+            <label class="field">
+              <span>Tempo — <b id="metroTempoOut">90</b> BPM</span>
+              <input type="range" id="metroTempo" min="40" max="208" value="90" step="1" />
+            </label>
+            <label class="field">
+              <span>Beats per bar</span>
+              <select id="metroBeats">
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4" selected>4</option>
+                <option value="6">6</option>
+              </select>
+            </label>
+            <button class="btn primary" id="metroToggle">Start metronome</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card studio-card">
+        <h3>Record your playing</h3>
+        <div class="recorder">
+          <div class="recline">
+            <span class="recdot" id="recDot"></span>
+            <button class="btn primary" id="recToggle">Record</button>
+            <button class="btn ghost" id="recUse" hidden>Use this take ↓</button>
+          </div>
+          <p class="micro" id="recStatus">Click record and play. Your browser will ask for microphone access.</p>
+          <audio id="recPlayback" controls hidden></audio>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section id="analyze" class="panel">
   <div class="wrap">
     <h2>Analyze a performance</h2>
+    <p class="micro" id="studentChosen"></p>
     <p class="sub">Run the built-in demo, or upload your own recording plus a few
       professional reference recordings of the same piece.</p>
 
@@ -138,6 +186,7 @@
 <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.3/build/cjs/vexflow.js"></script>
 <script src="diagrams.js"></script>
 <script src="notation.js"></script>
+<script src="studio.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

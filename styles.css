@@ -106,3 +106,21 @@ h1,h2,h3,h4{line-height:1.15;margin:0 0 .5em}
 .vfwrap{background:#f7f5ef;border:1px solid var(--line);border-radius:10px;padding:6px 8px;margin:8px 0;overflow:hidden}
 .vfwrap svg{display:block;width:100%;height:auto}
 .ex .vfwrap{max-width:340px}
+
+/* ---- Practice studio: metronome + recorder ---- */
+.studio{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+@media(max-width:720px){.studio{grid-template-columns:1fr}}
+.studio-card h3{margin:0 0 10px}
+.metro{display:flex;align-items:center;gap:16px}
+.metro-controls{flex:1;display:flex;flex-direction:column;gap:10px}
+.beatdot{width:54px;height:54px;border-radius:50%;flex:none;background:#10152f;
+  border:2px solid var(--line);transition:transform .06s ease,background .06s ease}
+.beatdot.flash{background:var(--accent);transform:scale(1.12)}
+.beatdot.flash.accent{background:#ff8a8a}
+.recorder{display:flex;flex-direction:column;gap:10px}
+.recline{display:flex;align-items:center;gap:10px}
+.recdot{width:12px;height:12px;border-radius:50%;background:#3a4372;flex:none}
+.recdot.live{background:#ff5a5a;animation:recpulse 1s infinite}
+@keyframes recpulse{0%,100%{opacity:1}50%{opacity:.3}}
+#recPlayback{width:100%;margin-top:4px}
+.btn.on{background:#ff8a8a;border-color:#ff8a8a;color:#1a1030}
