@@ -118,10 +118,62 @@
     }
   }
 
+  // ------------------------------ play-along ------------------------------
+  let timers = [], playing = false;
+
+  function stopPlay() {
+    playing = false;
+    timers.forEach(clearTimeout); timers = [];
+    if (window.Metro) window.Metro.stop();
+    if (osmd && osmd.cursor) osmd.cursor.hide();
+    const play = $("playAlong"), stop = $("playStop");
+    if (play) { play.hidden = false; play.textContent = "▶ Play along"; }
+    if (stop) stop.hidden = true;
+    window.dispatchEvent(new CustomEvent("resonance:playstop"));
+  }
+
+  function startPlay() {
+    if (!osmd || !notes.length) return;
+    stopPlay();
+    playing = true;
+    const bpm = (window.Metro && window.Metro.bpm) || 90;
+    const secPerQ = 60 / bpm;
+    const beats = (window.Metro && window.Metro.beats) || 4;
+    const countIn = $("countIn") && $("countIn").checked ? beats * secPerQ : 0;
+
+    osmd.cursor.reset(); osmd.cursor.show();
+    if (window.Metro) { window.Metro.beat = 0; window.Metro.start(); }
+
+    // Announce the note under the cursor at each onset (for live-marking later too).
+    const emit = (i) => window.dispatchEvent(new CustomEvent("resonance:cursor", { detail: { index: i, note: notes[i] } }));
+    const t0 = countIn * 1000;
+    timers.push(setTimeout(() => { if (playing) emit(0); }, t0));
+    for (let i = 1; i < notes.length; i++) {
+      timers.push(setTimeout(() => {
+        if (!playing) return;
+        osmd.cursor.next();
+        emit(i);
+      }, t0 + notes[i].t * secPerQ * 1000));
+    }
+    const total = notes.length ? notes[notes.length - 1].t + notes[notes.length - 1].dur : 0;
+    timers.push(setTimeout(stopPlay, t0 + total * secPerQ * 1000 + 300));
+
+    const play = $("playAlong"), stop = $("playStop");
+    if (play) play.hidden = true;
+    if (stop) stop.hidden = false;
+    window.dispatchEvent(new CustomEvent("resonance:playstart", { detail: { countIn } }));
+  }
+
+  window.PlayAlong = { start: startPlay, stop: stopPlay, isPlaying: () => playing };
+
   function init() {
     const inp = $("scoreFile");
-    if (!inp) return;
-    inp.addEventListener("change", (e) => { if (e.target.files[0]) loadFile(e.target.files[0]); });
+    if (inp) inp.addEventListener("change", (e) => { if (e.target.files[0]) loadFile(e.target.files[0]); });
+    const play = $("playAlong"), stop = $("playStop");
+    if (play) play.addEventListener("click", startPlay);
+    if (stop) stop.addEventListener("click", stopPlay);
+    // reveal play controls once a score is loaded
+    window.ScoreView.onLoad(() => { const row = $("playRow"); if (row) row.hidden = false; });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();

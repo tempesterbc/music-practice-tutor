@@ -132,3 +132,8 @@ h1,h2,h3,h4{line-height:1.15;margin:0 0 .5em}
 .scorebox{background:#ffffff;border:1px solid var(--line);border-radius:12px;
   padding:10px;margin-top:10px;min-height:80px;overflow-x:auto}
 .scorebox:empty{display:none}
+
+/* ---- Play-along controls ---- */
+.playrow{display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap}
+.chk{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.chk input{width:auto}
