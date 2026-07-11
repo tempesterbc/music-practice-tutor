@@ -216,8 +216,14 @@
       notation with the correct key signature, transposed for your instrument.</p>
     <div class="exhead">
       <label class="exinstr">Instrument <select id="scInstrument"></select></label>
+      <label class="exinstr">Preset set <select id="scPreset"></select></label>
       <label class="exinstr">Key (concert) <select id="scKey"></select></label>
       <label class="exinstr">Scale <select id="scType"></select></label>
+    </div>
+    <div class="playrow" id="scStep" hidden>
+      <button class="btn ghost" id="scPrev">‹ Prev</button>
+      <span class="micro" id="scCount"></span>
+      <button class="btn ghost" id="scNext">Next ›</button>
     </div>
     <p class="micro" id="scCap"></p>
     <div id="scScore" class="scorebox"></div>

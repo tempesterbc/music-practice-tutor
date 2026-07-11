@@ -32,6 +32,22 @@
   const TYPES = ["Major", "Natural minor", "Harmonic minor", "Melodic minor", "Chromatic"];
   const isMinor = (t) => t.indexOf("minor") >= 0;
 
+  // preset scale SETS — the requirements essentially every district/all-state
+  // audition draws from. Circle-of-fifths order.
+  const CIRCLE = [0, 7, 2, 9, 4, 11, 6, 1, 8, 3, 10, 5];
+  const set = (type) => CIRCLE.map((pc) => ({ pc, type }));
+  const PRESETS = {
+    "— none (pick manually) —": null,
+    "All 12 major scales": set("Major"),
+    "All natural minor scales": set("Natural minor"),
+    "All harmonic minor scales": set("Harmonic minor"),
+    "All melodic minor scales": set("Melodic minor"),
+    "Chromatic scale": [{ pc: 0, type: "Chromatic" }],
+    "Full audition set (12 majors + chromatic)": set("Major").concat([{ pc: 0, type: "Chromatic" }]),
+    "Majors + all 3 minor forms (48)": set("Major").concat(set("Natural minor"), set("Harmonic minor"), set("Melodic minor")),
+  };
+  let presetItems = null, presetIdx = 0;
+
   function keysigAlter(fifths) {
     const m = {};
     if (fifths > 0) SHARP_ORDER.slice(0, fifths).forEach((l) => (m[l] = 1));
@@ -121,8 +137,17 @@
   function render() {
     if (!tk) return;
     const inst = INSTR[$("scInstrument").value] || INSTR["Concert (C)"];
-    const concertPc = +$("scKey").value;
-    const type = $("scType").value;
+    let concertPc, type;
+    if (presetItems) {
+      const it = presetItems[presetIdx];
+      concertPc = it.pc; type = it.type;
+      if ($("scKey")) $("scKey").value = it.pc;
+      if ($("scType")) $("scType").value = it.type;
+      $("scCount").textContent = "Scale " + (presetIdx + 1) + " of " + presetItems.length;
+    } else {
+      concertPc = +$("scKey").value;
+      type = $("scType").value;
+    }
     const writtenPc = (concertPc + inst.iv) % 12;
     const sc = buildScale(writtenPc, type, inst.clef);
     const xml = scoreXML(inst.clef, sc.fifths, sc.notes);
@@ -145,7 +170,19 @@
     si.innerHTML = Object.keys(INSTR).map((n) => `<option>${n}</option>`).join("");
     sk.innerHTML = Object.keys(PC_LABEL).map((pc) => `<option value="${pc}">${PC_LABEL[pc]}</option>`).join("");
     st.innerHTML = TYPES.map((t) => `<option>${t}</option>`).join("");
-    [si, sk, st].forEach((el) => el.addEventListener("change", render));
+    const sp = $("scPreset");
+    if (sp) sp.innerHTML = Object.keys(PRESETS).map((n) => `<option>${n}</option>`).join("");
+    si.addEventListener("change", render);   // instrument change keeps the preset, just transposes
+    const exitPreset = () => { presetItems = null; if (sp) sp.value = Object.keys(PRESETS)[0]; if ($("scStep")) $("scStep").hidden = true; render(); };
+    [sk, st].forEach((el) => el.addEventListener("change", exitPreset));
+    if (sp) sp.addEventListener("change", () => {
+      presetItems = PRESETS[sp.value]; presetIdx = 0;
+      if ($("scStep")) $("scStep").hidden = !presetItems;
+      render();
+    });
+    const step = (d) => { if (presetItems) { presetIdx = (presetIdx + d + presetItems.length) % presetItems.length; render(); } };
+    if ($("scPrev")) $("scPrev").addEventListener("click", () => step(-1));
+    if ($("scNext")) $("scNext").addEventListener("click", () => step(1));
     $("scScore").innerHTML = '<p class="micro" style="color:#333;margin:8px">Loading the engraver…</p>';
     await loadVerovio();
     render();
