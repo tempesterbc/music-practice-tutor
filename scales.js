@@ -189,8 +189,14 @@
     if ($("scPrev")) $("scPrev").addEventListener("click", () => step(-1));
     if ($("scNext")) $("scNext").addEventListener("click", () => step(1));
     $("scScore").innerHTML = '<p class="micro" style="color:#333;margin:8px">Loading the engraver…</p>';
-    await loadVerovio();
-    render();
+    loadVerovio().then(render);
+    setTimeout(() => {
+      if (!tk) {
+        const b = $("scScore");
+        if (b) b.innerHTML = '<p class="micro" style="color:#333;margin:8px">Couldn’t load the notation engine — ' +
+          'check your connection and reload the page.</p>';
+      }
+    }, 20000);
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
