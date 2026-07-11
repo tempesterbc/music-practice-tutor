@@ -115,22 +115,27 @@
   let tk = null;
   function loadVerovio() {
     return new Promise((resolve) => {
-      const go = () => {
-        if (window.verovio && window.verovio.module && typeof window.verovio.toolkit === "function") {
-          tk = new verovio.toolkit();
-          tk.setOptions({ adjustPageHeight: true, breaks: "none", scale: 40, footer: "none", header: "none",
-            pageMarginTop: 8, pageMarginBottom: 8, pageMarginLeft: 8, pageMarginRight: 8 });
-          resolve(true);
-        } else setTimeout(go, 120);
+      // The toolkit function exists before the WASM runtime is ready, so poll by
+      // actually trying to construct it; it throws until the runtime is initialized.
+      const tryMake = () => {
+        if (window.verovio && typeof window.verovio.toolkit === "function") {
+          try {
+            const t = new verovio.toolkit();
+            t.setOptions({ adjustPageHeight: true, breaks: "none", scale: 40, footer: "none", header: "none",
+              pageMarginTop: 8, pageMarginBottom: 8, pageMarginLeft: 8, pageMarginRight: 8 });
+            tk = t;
+            return resolve(true);
+          } catch (e) { /* runtime not ready yet — keep polling */ }
+        }
+        setTimeout(tryMake, 150);
       };
-      if (window.verovio && window.verovio.toolkit) return go();
       if (!document.getElementById("verovio-cdn")) {
         const s = document.createElement("script");
         s.id = "verovio-cdn";
         s.src = "https://cdn.jsdelivr.net/npm/verovio@4.3.1/dist/verovio-toolkit-wasm.js";
         document.head.appendChild(s);
       }
-      go();
+      tryMake();
     });
   }
 
