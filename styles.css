@@ -184,3 +184,20 @@ h1,h2,h3,h4{line-height:1.15;margin:0 0 .5em}
 .exlbl{display:inline-block;min-width:74px;color:var(--accent);font-weight:600;font-size:11px;
   text-transform:uppercase;letter-spacing:.04em;vertical-align:top;margin-right:6px}
 .exrow > span:last-child{color:var(--ink)}
+
+/* ---- Adaptive coaching plan ---- */
+.coach{margin-top:12px}
+.coach h4{margin:0 0 2px}
+.coach-area{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;background:#141a35;padding:10px 12px;margin:9px 0}
+.coach-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px}
+.coach-h b{font-size:15px}
+.pri{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;padding:2px 8px;border-radius:20px}
+.pri.p1{background:#d64545;color:#fff}
+.pri.p2{background:#e0a021;color:#1a1030}
+.pri.p3{background:#6a74a8;color:#fff}
+.pri.ok{background:#2e9b57;color:#fff}
+.coach-min{margin-left:auto;font-size:12px;color:var(--muted)}
+.coach-say{font-size:13.5px;color:var(--ink);margin:4px 0}
+.coach-fix{font-size:13.5px;color:var(--muted);margin:4px 0}
+.coach-ex{font-size:13px;background:#10152f;border-radius:8px;padding:6px 10px;margin:5px 0;line-height:1.5}
+.coach-ex b{color:var(--accent)}

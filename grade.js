@@ -124,16 +124,74 @@
     const dbs = louds.map((x) => 20 * Math.log10(x / maxLoud));
     const dynRange = dbs.length ? Math.round(Math.max.apply(null, dbs) - Math.min.apply(null, dbs)) : 0;
 
-    // ---- tips ----
-    const tips = [];
-    if (c.missed / n > 0.2) tips.push("Several notes didn’t sound clearly — slow the tempo and make each note speak before moving on.");
-    if (c.wrong / n > 0.1) tips.push("Some wrong pitches — practice the passage slowly and check the notes/fingerings.");
-    if (avgSigned < -12) tips.push("You trend flat (" + avgSigned + "¢ on average) — long tones against a drone will raise your pitch center.");
-    else if (avgSigned > 12) tips.push("You trend sharp (+" + avgSigned + "¢ on average) — relax the air/embouchure and check against a drone.");
-    if (avgSteady > 30) tips.push("Your pitch wobbles within notes (±" + avgSteady + "¢) — sustained long tones will steady it.");
-    if (vibNotes.length >= 2 && vibRateSpread > 1.2) tips.push("Your vibrato speed is uneven — practice it in rhythm to the metronome (e.g. 4 pulses per beat).");
-    if (played.length >= 4 && dynRange < 4) tips.push("Dynamics are quite flat — shape the phrase with a swell and taper to add musicality.");
-    if (!tips.length) tips.push("Clean, musical run — keep it up. Nudge the tempo up and hold this accuracy.");
+    // ---- register-dependent intonation + worst offenders ----
+    const pitched = played.filter((r) => r.cents != null).slice().sort((a, b) => a.midi - b.midi);
+    let regNote = "";
+    if (pitched.length >= 4) {
+      const h = pitched.slice(Math.ceil(pitched.length / 2)), l = pitched.slice(0, Math.floor(pitched.length / 2));
+      const hi = h.reduce((s, r) => s + r.cents, 0) / h.length, lo = l.reduce((s, r) => s + r.cents, 0) / l.length;
+      if (hi - lo < -12) regNote = "flat"; else if (hi - lo > 12) regNote = "sharp";
+    }
+    const worst = pitched.slice().sort((a, b) => Math.abs(b.cents) - Math.abs(a.cents)).slice(0, 3)
+      .map((r) => PD().midiToName(r.midi) + " (" + (r.cents > 0 ? "+" : "") + Math.round(r.cents) + "¢)");
+
+    // ---- severity per area (0..100), then rank + weight the schedule ----
+    const clamp = (x) => Math.max(0, Math.min(100, Math.round(x)));
+    const sev = {
+      accuracy: clamp(((c.wrong + c.missed) / n) * 140),
+      tuning: clamp((100 - inTune) * 0.55 + Math.abs(avgSigned) * 1.6 + Math.max(0, avgSteady - 15) * 0.8),
+      tone: clamp(Math.max(0, avgSteady - 18) * 2.4),
+      vibrato: clamp(vibNotes.length >= 2 && vibRateSpread > 1.2 ? 45 + vibRateSpread * 10
+        : (played.length >= 4 && vibNotes.length === 0 ? 16 : 0)),
+      dynamics: clamp(played.length >= 4 && dynRange < 5 ? (5 - dynRange) * 14 : 0),
+    };
+    const AREA = {
+      accuracy: { title: "Note accuracy",
+        say: c.missed > c.wrong ? c.missed + " note(s) didn't speak clearly." : c.wrong + " wrong pitch(es) slipped in.",
+        fix: "Take it well under tempo so every note is right before you add speed — accuracy first, speed second.",
+        ex: [["Tempo Ramp (Slow-to-Fast Reps)", "3 perfect reps slow, then +5 BPM; drop back the moment it's messy."],
+             ["Daily Sight-Reading", "5 min, eyes ahead, don't stop to fix."]] },
+      tuning: { title: "Intonation" + (regNote ? " (runs " + regNote + " up high)" : ""),
+        say: "Only " + inTune + "% of notes landed in tune" + (avgSigned ? ", averaging " + (avgSigned > 0 ? "+" : "") + avgSigned + "¢ " + (avgSigned > 0 ? "sharp" : "flat") : "") + (worst.length ? ". Worst: " + worst.join(", ") : "") + ".",
+        fix: regNote === "flat" ? "You drop flat as you climb — keep the air fast and supported into the upper register instead of letting it thin."
+          : regNote === "sharp" ? "You creep sharp up high — ease the embouchure/air pressure as you ascend."
+          : "Center each pitch by ear against a fixed reference until the beating stops.",
+        ex: [["Long Tones with Tuner/Drone", "hold each scale degree against a drone until it locks; learn which notes tend off."],
+             ["Slow Scales with Drone", "tune every note to the drone before moving on."]] },
+      tone: { title: "Tone steadiness",
+        say: "Your pitch wavers ±" + avgSteady + "¢ within notes — the tone isn't settling.",
+        fix: "Keep the airstream perfectly constant — one long, unbroken line of air through each note.",
+        ex: [["Long Tones", "8+ beats dead steady: same pitch, volume and colour to the release."],
+             ["Crescendo–Decrescendo Long Tones", "swell pp–f–pp keeping pitch and tone unchanged."]] },
+      vibrato: { title: "Vibrato control",
+        say: vibNotes.length ? "Vibrato speed is uneven (~" + vibRate.toFixed(1) + " Hz, spread ±" + vibRateSpread.toFixed(1) + ")." : "Little or no vibrato on sustained notes.",
+        fix: "Train vibrato in strict rhythm so it's even in width and speed, centred on the pitch (dip below, return).",
+        ex: [["Vibrato Isolation Drills (Knocking Motion)", "2, then 3, then 4 even pulses per beat to a metronome."]] },
+      dynamics: { title: "Dynamics & shaping",
+        say: "The line is dynamically flat (~" + dynRange + " dB) — even and unshaped.",
+        fix: "Give each phrase a direction: grow toward a high point and taper the ends.",
+        ex: [["Messa di Voce", "swell pp–f–pp on one note with rock-steady pitch."],
+             ["Expressive Phrasing (Shape & Direction)", "pick the phrase's peak and shape toward it."]] },
+    };
+    let ranked = Object.keys(AREA).map((k) => ({ k, sev: sev[k] || 0 })).filter((a) => a.sev >= 15)
+      .sort((a, b) => b.sev - a.sev).slice(0, 3);
+    let planHTML;
+    if (!ranked.length) {
+      planHTML = '<div class="coach-area"><div class="coach-h"><span class="pri ok">On track</span>' +
+        '<b>Clean, musical run</b></div><p class="coach-fix">Nothing major to fix — nice work. Push the tempo a ' +
+        'notch and focus on musical shaping.</p><div class="coach-ex"><b>Cantabile Etudes (Singing Style)</b> — ' +
+        'play a slow melody as if you were singing the words.</div></div>';
+    } else {
+      const sum = ranked.reduce((s, a) => s + a.sev, 0);
+      ranked.forEach((a) => (a.min = Math.max(4, Math.round(20 * a.sev / sum))));
+      planHTML = ranked.map((a, i) => {
+        const A = AREA[a.k];
+        const exs = A.ex.map((e) => '<div class="coach-ex"><b>' + e[0] + '</b> — ' + e[1] + '</div>').join("");
+        return '<div class="coach-area"><div class="coach-h"><span class="pri p' + (i + 1) + '">Priority ' + (i + 1) + '</span>' +
+          '<b>' + A.title + '</b><span class="coach-min">~' + a.min + ' min</span></div>' +
+          '<p class="coach-say">' + A.say + '</p><p class="coach-fix">' + A.fix + '</p>' + exs + '</div>';
+      }).join("");
+    }
 
     const chips = res.map((r) => {
       const label = PD().midiToName(r.midi);
@@ -165,10 +223,11 @@
       '</div></div>' +
       '<div class="notechips">' + chips + '</div>' +
       musicality +
-      '<div class="grade-tips"><b>What to work on</b><ul>' +
-        tips.map((t) => "<li>" + t + "</li>").join("") + "</ul>" +
-        '<p class="micro">Graded against your uploaded score. Green = in tune, amber = out of tune, ' +
-        'red = wrong note, grey = didn’t sound; ∿ marks detected vibrato.</p></div>';
+      '<div class="coach"><h4>Your adaptive practice plan</h4>' +
+        '<p class="micro">Prescribed from this take — the areas that need it most get the most time.</p>' +
+        planHTML + '</div>' +
+        '<p class="micro" style="margin-top:8px">Graded against your uploaded score. Green = in tune, ' +
+        'amber = out of tune, red = wrong note, grey = didn’t sound; ∿ marks detected vibrato.</p>';
     box.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
